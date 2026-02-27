@@ -11,7 +11,7 @@ This extension supports the following file formats:
 | Item (.itm)               | ✅      | ❌    |
 | Vehicle (.sbv)            | ✅      | ❌    |
 | Legacy Object (.sit)      | ✅      | ❌    |
-| Interactive Object (.it3) | ❌      | ❌    |
+| Interactive Object (.it3) | ✅      | ✅    |
 
 ## Development
 
