@@ -88,12 +88,30 @@ class ImportSBV(bpy.types.Operator, ImportHelper):
         return import_sbv.load(context, **keywords)
 
 
+class ImportIT3(bpy.types.Operator, ImportHelper):
+    """Load a Sub Rosa Interactive Object File"""
+
+    bl_idname = "import_scene.it3"
+    bl_label = "Import IT3"
+    bl_options = {"UNDO"}
+
+    filename_ext = ".it3"
+    filter_glob = StringProperty(default="*.it3", options={"HIDDEN"})
+
+    def execute(self, context):
+        from . import import_it3
+
+        keywords = self.as_keywords(ignore=("filter_glob",))
+        return import_it3.load(context, **keywords)
+
+
 def menu_func_import(self, context):
     self.layout.operator(ImportCMO.bl_idname, text="Sub Rosa Object (.cmo)")
     self.layout.operator(ImportCMC.bl_idname, text="Sub Rosa Character (.cmc)")
     self.layout.operator(ImportITM.bl_idname, text="Sub Rosa Item (.itm)")
     self.layout.operator(ImportSIT.bl_idname, text="Sub Rosa Legacy Item (.sit)")
     self.layout.operator(ImportSBV.bl_idname, text="Sub Rosa Vehicle (.sbv)")
+    self.layout.operator(ImportIT3.bl_idname, text="Sub Rosa Interactive Object (.it3)")
 
 
 class ExportCMO(bpy.types.Operator, ExportHelper):
@@ -133,12 +151,39 @@ class ExportCMC(bpy.types.Operator, ExportHelper):
         return {"FINISHED"}
 
 
+class ExportIT3(bpy.types.Operator, ExportHelper):
+    """Export a Sub Rosa Interactive Object File"""
+
+    bl_idname = "export_scene.it3"
+    bl_label = "Export IT3"
+
+    filename_ext = ".it3"
+    filter_glob = StringProperty(default="*.it3", options={"HIDDEN"})
+
+    def execute(self, context):
+        from . import export_it3
+
+        keywords = self.as_keywords(ignore=("filter_glob", "check_existing"))
+        return export_it3.save(context, **keywords)
+
+
 def menu_func_export(self, context):
     self.layout.operator(ExportCMO.bl_idname, text="Sub Rosa Object (.cmo)")
     self.layout.operator(ExportCMC.bl_idname, text="Sub Rosa Character (.cmc)")
+    self.layout.operator(ExportIT3.bl_idname, text="Sub Rosa Interactive Object (.it3)")
 
 
-classes = (ImportCMO, ImportCMC, ImportITM, ImportSIT, ImportSBV, ExportCMO, ExportCMC)
+classes = (
+    ImportCMO,
+    ImportCMC,
+    ImportITM,
+    ImportSIT,
+    ImportSBV,
+    ImportIT3,
+    ExportCMO,
+    ExportCMC,
+    ExportIT3,
+)
 
 
 def register():
