@@ -4,14 +4,22 @@ A comprehensive Blender extension for import/export of file formats from the gam
 
 This extension supports the following file formats:
 
-| Format                    | Import  | Export |
-|---------------------------|:-------:|:------:|
-| Character (.cmc)          | ✅      | ✅    |
-| Object (.cmo)             | ✅      | ✅    |
-| Item (.itm)               | ✅      | ❌    |
-| Vehicle (.sbv)            | ✅      | ❌    |
-| Legacy Object (.sit)      | ✅      | ❌    |
-| Interactive Object (.it3) | ✅      | ✅    |
+| Format                         | Import  | Export |
+|--------------------------------|:-------:|:------:|
+| Character (.cmc)               | ✅      | ✅    |
+| Object (.cmo)                  | ✅      | ✅    |
+| Item (.itm)                    | ✅      | ❌    |
+| Item / Interactive Object (.it3) | ✅    | ✅    |
+| Vehicle (.sbv)                 | ✅      | ✅    |
+| Vehicle TST v1 (.tst)          | ✅      | ✅    |
+| Vehicle TST v2 (.tst)          | ✅      | ✅    |
+| Vehicle SRV v1 (.srv)          | ✅      | ✅    |
+| Legacy Item (.sit)             | ✅      | ❌    |
+
+Import/export entries are added under `File > Import > Sub Rosa` and `File > Export > Sub Rosa`.
+
+For SRV files, `<name>.collision` is the root collision mesh and `<name>` is the first visible child mesh.
+For TST v1 files, `<name>.window.N` curves are the trailing window loops.
 
 ## Development
 

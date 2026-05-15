@@ -32,6 +32,7 @@ def load_mesh(
     vertex_uvs,
     vertex_weights,
     bones: Optional[list[tuple[float, float, float]]],
+    loop_uvs: Optional[list[tuple[float, float]]] = None,
 ):
     new_vertices: list[tuple[float, float, float]] = []
     for vertex in vertices:
@@ -40,7 +41,12 @@ def load_mesh(
     mesh = bpy.data.meshes.new(name)
     mesh.from_pydata(new_vertices, (), faces)
 
-    if vertex_uvs:
+    if loop_uvs:
+        if len(loop_uvs) == len(mesh.loops):
+            layer = mesh.uv_layers.new(do_init=True)
+            for i, loop in enumerate(mesh.loops):
+                layer.uv[loop.index].vector = mathutils.Vector(loop_uvs[i])
+    elif vertex_uvs:
         layer = mesh.uv_layers.new(do_init=True)
         for loop in mesh.loops:
             layer.uv[loop.index].vector = mathutils.Vector(
