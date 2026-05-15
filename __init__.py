@@ -239,6 +239,27 @@ class ExportSBV(bpy.types.Operator, ExportHelper):
         return {"FINISHED"}
 
 
+class ExportITM(bpy.types.Operator, ExportHelper):
+    """Export a Sub Rosa Item File"""
+
+    bl_idname = "export_scene.itm"
+    bl_label = "Export ITM"
+
+    filename_ext = ".itm"
+    filter_glob = StringProperty(default="*.itm", options={"HIDDEN"})
+
+    def execute(self, context):
+        from . import export_itm
+
+        keywords = self.as_keywords(ignore=("filter_glob", "check_existing"))
+        didError, message = export_itm.save(context, **keywords)
+        if didError:
+            self.report({"INFO"}, message)
+            return {"CANCELLED"}
+
+        return {"FINISHED"}
+
+
 class ExportTSTV1(bpy.types.Operator, ExportHelper):
     """Export a Sub Rosa TST v1 Vehicle File"""
 
@@ -326,6 +347,7 @@ class SubRosaExportMenu(bpy.types.Menu):
         layout = self.layout
         layout.operator(ExportCMO.bl_idname, text="Object (.cmo)")
         layout.operator(ExportCMC.bl_idname, text="Character (.cmc)")
+        layout.operator(ExportITM.bl_idname, text="Item (.itm)")
         layout.operator(ExportIT3.bl_idname, text="Item / Interactive Object (.it3)")
         layout.separator()
         layout.operator(ExportSBV.bl_idname, text="Vehicle SBV (.sbv)")
@@ -352,6 +374,7 @@ classes = (
     ImportIT3,
     ExportCMO,
     ExportCMC,
+    ExportITM,
     ExportSBV,
     ExportTSTV1,
     ExportTSTV2,

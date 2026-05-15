@@ -8,7 +8,7 @@ This extension supports the following file formats:
 |--------------------------------|:-------:|:------:|
 | Character (.cmc)               | ✅      | ✅    |
 | Object (.cmo)                  | ✅      | ✅    |
-| Item (.itm)                    | ✅      | ❌    |
+| Item (.itm)                    | ✅      | ✅    |
 | Item / Interactive Object (.it3) | ✅    | ✅    |
 | Vehicle (.sbv)                 | ✅      | ✅    |
 | Vehicle TST v1 (.tst)          | ✅      | ✅    |
