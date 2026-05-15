@@ -88,12 +88,97 @@ class ImportSBV(bpy.types.Operator, ImportHelper):
         return import_sbv.load(context, **keywords)
 
 
+class ImportTSTV1(bpy.types.Operator, ImportHelper):
+    """Load a Sub Rosa TST v1 Vehicle File"""
+
+    bl_idname = "import_scene.tst_v1"
+    bl_label = "Import TST v1"
+    bl_options = {"UNDO"}
+
+    filename_ext = ".tst"
+    filter_glob = StringProperty(default="*.tst", options={"HIDDEN"})
+
+    def execute(self, context):
+        from . import import_tst
+
+        keywords = self.as_keywords(ignore=("filter_glob",))
+        keywords["expected_version"] = 1
+        return import_tst.load(context, **keywords)
+
+
+class ImportTSTV2(bpy.types.Operator, ImportHelper):
+    """Load a Sub Rosa TST v2 Vehicle File"""
+
+    bl_idname = "import_scene.tst_v2"
+    bl_label = "Import TST v2"
+    bl_options = {"UNDO"}
+
+    filename_ext = ".tst"
+    filter_glob = StringProperty(default="*.tst", options={"HIDDEN"})
+
+    def execute(self, context):
+        from . import import_tst
+
+        keywords = self.as_keywords(ignore=("filter_glob",))
+        keywords["expected_version"] = 2
+        return import_tst.load(context, **keywords)
+
+
+class ImportSRVV1(bpy.types.Operator, ImportHelper):
+    """Load a Sub Rosa SRV v1 Vehicle File"""
+
+    bl_idname = "import_scene.srv_v1"
+    bl_label = "Import SRV v1"
+    bl_options = {"UNDO"}
+
+    filename_ext = ".srv"
+    filter_glob = StringProperty(default="*.srv", options={"HIDDEN"})
+
+    def execute(self, context):
+        from . import import_srv
+
+        keywords = self.as_keywords(ignore=("filter_glob",))
+        keywords["expected_version"] = 1
+        return import_srv.load(context, **keywords)
+
+
+class ImportIT3(bpy.types.Operator, ImportHelper):
+    """Load a Sub Rosa Interactive Object File"""
+
+    bl_idname = "import_scene.it3"
+    bl_label = "Import IT3"
+    bl_options = {"UNDO"}
+
+    filename_ext = ".it3"
+    filter_glob = StringProperty(default="*.it3", options={"HIDDEN"})
+
+    def execute(self, context):
+        from . import import_it3
+
+        keywords = self.as_keywords(ignore=("filter_glob",))
+        return import_it3.load(context, **keywords)
+
+
+class SubRosaImportMenu(bpy.types.Menu):
+    bl_idname = "TOPBAR_MT_subrosa_import"
+    bl_label = "Sub Rosa"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator(ImportCMO.bl_idname, text="Object (.cmo)")
+        layout.operator(ImportCMC.bl_idname, text="Character (.cmc)")
+        layout.operator(ImportITM.bl_idname, text="Item (.itm)")
+        layout.operator(ImportSIT.bl_idname, text="Legacy Item (.sit)")
+        layout.operator(ImportIT3.bl_idname, text="Item / Interactive Object (.it3)")
+        layout.separator()
+        layout.operator(ImportSBV.bl_idname, text="Vehicle SBV (.sbv)")
+        layout.operator(ImportTSTV1.bl_idname, text="Vehicle TST v1 (.tst)")
+        layout.operator(ImportTSTV2.bl_idname, text="Vehicle TST v2 (.tst)")
+        layout.operator(ImportSRVV1.bl_idname, text="Vehicle SRV v1 (.srv)")
+
+
 def menu_func_import(self, context):
-    self.layout.operator(ImportCMO.bl_idname, text="Sub Rosa Object (.cmo)")
-    self.layout.operator(ImportCMC.bl_idname, text="Sub Rosa Character (.cmc)")
-    self.layout.operator(ImportITM.bl_idname, text="Sub Rosa Item (.itm)")
-    self.layout.operator(ImportSIT.bl_idname, text="Sub Rosa Legacy Item (.sit)")
-    self.layout.operator(ImportSBV.bl_idname, text="Sub Rosa Vehicle (.sbv)")
+    self.layout.menu(SubRosaImportMenu.bl_idname, text="Sub Rosa")
 
 
 class ExportCMO(bpy.types.Operator, ExportHelper):
@@ -133,12 +218,146 @@ class ExportCMC(bpy.types.Operator, ExportHelper):
         return {"FINISHED"}
 
 
+class ExportSBV(bpy.types.Operator, ExportHelper):
+    """Export a Sub Rosa Vehicle File"""
+
+    bl_idname = "export_scene.sbv"
+    bl_label = "Export SBV"
+
+    filename_ext = ".sbv"
+    filter_glob = StringProperty(default="*.sbv", options={"HIDDEN"})
+
+    def execute(self, context):
+        from . import export_sbv
+
+        keywords = self.as_keywords(ignore=("filter_glob", "check_existing"))
+        didError, message = export_sbv.save(context, **keywords)
+        if didError:
+            self.report({"INFO"}, message)
+            return {"CANCELLED"}
+
+        return {"FINISHED"}
+
+
+class ExportTSTV1(bpy.types.Operator, ExportHelper):
+    """Export a Sub Rosa TST v1 Vehicle File"""
+
+    bl_idname = "export_scene.tst_v1"
+    bl_label = "Export TST v1"
+
+    filename_ext = ".tst"
+    filter_glob = StringProperty(default="*.tst", options={"HIDDEN"})
+
+    def execute(self, context):
+        from . import export_tst
+
+        keywords = self.as_keywords(ignore=("filter_glob", "check_existing"))
+        didError, message = export_tst.save(context, version=1, **keywords)
+        if didError:
+            self.report({"INFO"}, message)
+            return {"CANCELLED"}
+
+        return {"FINISHED"}
+
+
+class ExportTSTV2(bpy.types.Operator, ExportHelper):
+    """Export a Sub Rosa TST v2 Vehicle File"""
+
+    bl_idname = "export_scene.tst_v2"
+    bl_label = "Export TST v2"
+
+    filename_ext = ".tst"
+    filter_glob = StringProperty(default="*.tst", options={"HIDDEN"})
+
+    def execute(self, context):
+        from . import export_tst
+
+        keywords = self.as_keywords(ignore=("filter_glob", "check_existing"))
+        didError, message = export_tst.save(context, version=2, **keywords)
+        if didError:
+            self.report({"INFO"}, message)
+            return {"CANCELLED"}
+
+        return {"FINISHED"}
+
+
+class ExportSRVV1(bpy.types.Operator, ExportHelper):
+    """Export a Sub Rosa SRV v1 Vehicle File"""
+
+    bl_idname = "export_scene.srv_v1"
+    bl_label = "Export SRV v1"
+
+    filename_ext = ".srv"
+    filter_glob = StringProperty(default="*.srv", options={"HIDDEN"})
+
+    def execute(self, context):
+        from . import export_srv
+
+        keywords = self.as_keywords(ignore=("filter_glob", "check_existing"))
+        didError, message = export_srv.save(context, version=1, **keywords)
+        if didError:
+            self.report({"INFO"}, message)
+            return {"CANCELLED"}
+
+        return {"FINISHED"}
+
+
+class ExportIT3(bpy.types.Operator, ExportHelper):
+    """Export a Sub Rosa Interactive Object File"""
+
+    bl_idname = "export_scene.it3"
+    bl_label = "Export IT3"
+
+    filename_ext = ".it3"
+    filter_glob = StringProperty(default="*.it3", options={"HIDDEN"})
+
+    def execute(self, context):
+        from . import export_it3
+
+        keywords = self.as_keywords(ignore=("filter_glob", "check_existing"))
+        return export_it3.save(context, **keywords)
+
+
+class SubRosaExportMenu(bpy.types.Menu):
+    bl_idname = "TOPBAR_MT_subrosa_export"
+    bl_label = "Sub Rosa"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator(ExportCMO.bl_idname, text="Object (.cmo)")
+        layout.operator(ExportCMC.bl_idname, text="Character (.cmc)")
+        layout.operator(ExportIT3.bl_idname, text="Item / Interactive Object (.it3)")
+        layout.separator()
+        layout.operator(ExportSBV.bl_idname, text="Vehicle SBV (.sbv)")
+        layout.operator(ExportTSTV1.bl_idname, text="Vehicle TST v1 (.tst)")
+        layout.operator(ExportTSTV2.bl_idname, text="Vehicle TST v2 (.tst)")
+        layout.operator(ExportSRVV1.bl_idname, text="Vehicle SRV v1 (.srv)")
+
+
 def menu_func_export(self, context):
-    self.layout.operator(ExportCMO.bl_idname, text="Sub Rosa Object (.cmo)")
-    self.layout.operator(ExportCMC.bl_idname, text="Sub Rosa Character (.cmc)")
+    self.layout.menu(SubRosaExportMenu.bl_idname, text="Sub Rosa")
 
 
-classes = (ImportCMO, ImportCMC, ImportITM, ImportSIT, ImportSBV, ExportCMO, ExportCMC)
+classes = (
+    SubRosaImportMenu,
+    SubRosaExportMenu,
+    ImportCMO,
+    ImportCMC,
+    ImportITM,
+    ImportSIT,
+    ImportSBV,
+    ImportTSTV1,
+    ImportTSTV2,
+    ImportSRVV1,
+    ImportIT3,
+    ExportCMO,
+    ExportCMC,
+    ExportSBV,
+    ExportTSTV1,
+    ExportTSTV2,
+    ExportSRVV1,
+    ExportIT3,
+)
 
 
 def register():
