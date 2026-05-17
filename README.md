@@ -20,6 +20,10 @@ Import/export entries are added under `File > Import > Sub Rosa` and `File > Exp
 
 For SRV files, `<name>.collision` is the root collision mesh and `<name>` is the first visible child mesh.
 For TST v1 files, `<name>.window.N` curves are the trailing window loops.
+For SBV files, the visible mesh uses material slots as face-type controls on export:
+`SBV Body` = face type `0`, `SBV Face Type 1` = `1`, `SBV Face Type 2` = `2`.
+Set the SBV face type in Blender by selecting faces on the visible vehicle mesh and assigning them to one of those material slots in the Material Properties panel.
+Legacy scenes that still use the old sentinel UVs are still accepted on export as a fallback.
 
 ## Development
 

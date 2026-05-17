@@ -18,6 +18,8 @@ def load(context, filepath):
         vertices = []
         faces = []
         loop_uvs = []
+        collision_vertices = []
+        collision_faces = []
 
         (section_id,) = unpack("<i", read(4))
         assert section_id == 0, "Expected section 0."
@@ -64,7 +66,8 @@ def load(context, filepath):
 
         (group_vertex_count,) = unpack("<i", read(4))
         assert group_vertex_count >= 0, "Invalid group vertex count."
-        read(4 * 3 * group_vertex_count)
+        for _ in range(group_vertex_count):
+            collision_vertices.append(unpack("<fff", read(4 * 3)))
 
         (group_count,) = unpack("<i", read(4))
         assert group_count >= 0, "Invalid group count."
@@ -79,13 +82,24 @@ def load(context, filepath):
             assert group_face_count >= 0, "Invalid group face count."
             for _ in range(group_face_count):
                 (num_vertices,) = unpack("<i", read(4))
-                assert num_vertices >= 0, "Invalid group face vertex count."
-                read(4 * num_vertices)
+                assert num_vertices >= 3, "Invalid group face vertex count."
+
+                vertex_indices = []
+                for _ in range(num_vertices):
+                    (vertex_id,) = unpack("<i", read(4))
+                    assert vertex_id >= 0, "Invalid group face vertex index."
+                    vertex_indices.append(vertex_id)
+
+                if num_vertices <= 4:
+                    collision_faces.append(tuple(vertex_indices))
+                else:
+                    for i in range(1, num_vertices - 1):
+                        collision_faces.append(
+                            (vertex_indices[0], vertex_indices[i], vertex_indices[i + 1])
+                        )
 
         name = bpy.path.display_name_from_filepath(filepath)
-        shared.load_mesh(context, name, vertices, faces, None, None, None)
-
-        obj = context.view_layer.objects.active
+        obj = shared.load_mesh(context, name, vertices, faces, None, None, None)
         assert obj is not None and obj.type == "MESH", "Failed to create object."
         mesh = obj.data
         assert len(loop_uvs) == len(mesh.loops), "Invalid UV count."
@@ -93,5 +107,16 @@ def load(context, filepath):
         layer = mesh.uv_layers.new(do_init=True)
         for i, loop in enumerate(mesh.loops):
             layer.uv[loop.index].vector = mathutils.Vector(loop_uvs[i])
+
+        if len(collision_vertices) > 0 and len(collision_faces) > 0:
+            shared.load_mesh(
+                context,
+                name + ".collision",
+                collision_vertices,
+                collision_faces,
+                None,
+                None,
+                None,
+            )
 
     return {"FINISHED"}

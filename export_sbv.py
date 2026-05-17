@@ -8,6 +8,12 @@ FACE_TYPE_UV_TARGETS = (
     (2, 0.09375, 0.09375),
 )
 
+FACE_TYPE_MATERIAL_NAMES = (
+    "SBV Body",
+    "SBV Face Type 1",
+    "SBV Face Type 2",
+)
+
 
 def get_base_name(name: str):
     if name.endswith(".collision"):
@@ -51,11 +57,29 @@ def infer_face_type_from_uv(mesh: bpy.types.Mesh, polygon: bpy.types.MeshPolygon
     return best_face_type
 
 
+def build_face_type_by_material_slot(mesh: bpy.types.Mesh):
+    face_type_by_slot = {}
+
+    for material_slot_index, material in enumerate(mesh.materials):
+        if material is None:
+            continue
+
+        for face_type, material_name in enumerate(FACE_TYPE_MATERIAL_NAMES):
+            if material.name == material_name:
+                face_type_by_slot[material_slot_index] = face_type
+                break
+
+    if len(face_type_by_slot) == 0:
+        return None
+
+    return face_type_by_slot
+
+
 def mesh_to_vertices_faces(
     obj: bpy.types.Object,
     depsgraph,
     reverse_faces: bool,
-    use_uv_face_type: bool,
+    face_type_by_material_slot,
 ):
     obj_for_convert = obj.evaluated_get(depsgraph)
 
@@ -78,11 +102,16 @@ def mesh_to_vertices_faces(
         if reverse_faces:
             vertex_indices.reverse()
 
-        face_type = polygon.material_index
-        if use_uv_face_type:
+        if face_type_by_material_slot is None:
+            face_type = polygon.material_index
             inferred_face_type = infer_face_type_from_uv(me, polygon)
             if inferred_face_type is not None:
                 face_type = inferred_face_type
+        else:
+            face_type = face_type_by_material_slot.get(
+                polygon.material_index,
+                polygon.material_index,
+            )
 
         if face_type not in (0, 1, 2):
             face_type = 0
@@ -155,8 +184,16 @@ def save(context: bpy.types.Context, filepath: str):
     if collision_object is None or collision_object.type != "MESH":
         return [True, "Missing collision mesh: " + base_name + ".collision"]
 
-    render_data = mesh_to_vertices_faces(render_object, depsgraph, False, True)
-    collision_data = mesh_to_vertices_faces(collision_object, depsgraph, True, False)
+    render_face_type_by_material_slot = build_face_type_by_material_slot(
+        render_object.data
+    )
+    render_data = mesh_to_vertices_faces(
+        render_object,
+        depsgraph,
+        False,
+        render_face_type_by_material_slot,
+    )
+    collision_data = mesh_to_vertices_faces(collision_object, depsgraph, True, None)
     if render_data is None or collision_data is None:
         return [True, "Failed to evaluate mesh data for export"]
 

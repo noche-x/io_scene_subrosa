@@ -33,6 +33,7 @@ def load_mesh(
     vertex_weights,
     bones: Optional[list[tuple[float, float, float]]],
     loop_uvs: Optional[list[tuple[float, float]]] = None,
+    face_material_indices: Optional[list[int]] = None,
 ):
     new_vertices: list[tuple[float, float, float]] = []
     for vertex in vertices:
@@ -40,6 +41,10 @@ def load_mesh(
 
     mesh = bpy.data.meshes.new(name)
     mesh.from_pydata(new_vertices, (), faces)
+
+    if face_material_indices and len(face_material_indices) == len(mesh.polygons):
+        for polygon, material_index in zip(mesh.polygons, face_material_indices):
+            polygon.material_index = material_index
 
     if loop_uvs:
         if len(loop_uvs) == len(mesh.loops):
@@ -152,3 +157,4 @@ def load_mesh(
     obj.select_set(True)
 
     view_layer.update()
+    return obj

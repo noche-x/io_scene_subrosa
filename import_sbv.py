@@ -3,6 +3,23 @@ from struct import unpack
 from . import shared
 
 
+FACE_TYPE_MATERIAL_NAMES = (
+    "SBV Body",
+    "SBV Face Type 1",
+    "SBV Face Type 2",
+)
+
+
+def ensure_face_type_materials(obj: bpy.types.Object):
+    for material_name in FACE_TYPE_MATERIAL_NAMES:
+        material = bpy.data.materials.get(material_name)
+        if material is None:
+            material = bpy.data.materials.new(material_name)
+
+        if obj.data.materials.get(material_name) is None:
+            obj.data.materials.append(material)
+
+
 def load(context, filepath):
     with open(filepath, "rb") as f:
         (version,) = unpack("<i", f.read(4))
@@ -36,7 +53,7 @@ def load(context, filepath):
 
         vertices = []
         faces = []
-        loop_uvs = []
+        face_material_indices = []
 
         (vertex_count,) = unpack("<i", f.read(4))
         for _ in range(vertex_count):
@@ -62,15 +79,7 @@ def load(context, filepath):
                 f.read(4 * 4)
 
             faces.append(tuple(vertex_indices))
-
-            if face_type == 1:
-                uv = (0.0, 1.0)
-            elif face_type == 2:
-                uv = (0.09375, 0.09375)
-            else:
-                uv = (16.5, 0.0)
-            for _ in range(num_vertices):
-                loop_uvs.append(uv)
+            face_material_indices.append(face_type if face_type in (0, 1, 2) else 0)
 
         window_vertices = []
         window_faces = []
@@ -96,7 +105,17 @@ def load(context, filepath):
             attachments.append((attachment_type, attachment_position, attachment_aux))
 
         name = bpy.path.display_name_from_filepath(filepath)
-        shared.load_mesh(context, name, vertices, faces, None, None, None, loop_uvs)
+        render_obj = shared.load_mesh(
+            context,
+            name,
+            vertices,
+            faces,
+            None,
+            None,
+            None,
+            face_material_indices=face_material_indices,
+        )
+        ensure_face_type_materials(render_obj)
         shared.load_mesh(
             context,
             name + ".collision",
